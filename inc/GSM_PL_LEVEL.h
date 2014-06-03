@@ -12,7 +12,6 @@
 #include <stdint.h>
 /** \endcond */
 
-/** \def Defines ring buffer size */
 #define RING_BUFFER_SIZE  1024          /**< Defines buffer size and types of head and tail */
 
 #ifndef RING_BUFFER_SIZE
@@ -38,14 +37,20 @@ typedef struct {
 } ring_buf;
 
 typedef struct _gsm_modem {
-    uint8_t state:1;            // if 0 - sending command, else if 1 - receiving answer
+    enum {
+        MODEM_CMD_SEND,
+        MODEM_ANS_RECV
+    } state:1;            // if 0 - sending command, else if 1 - receiving answer;
 
     ring_buf  action_queue;
+    ring_buf  answers;
+    uint8_t   cur_action;
 
-    void (*send_msg) (char* msg);
+    void      (*send_cmd) (char* cmd);                    /**< User defined send function */
+    uint8_t   (*callback)(char* answer, uint8_t action);
 } gsm_modem;
 
-void run_gsm_queue  (gsm_modem*     modem);
-void add_task       (gsm_scenario   action);
+void run_gsm_queue  (gsm_modem*     modem);     /**< Must be execute in main cycle continuously */
+void add_task       (gsm_modem* modem, gsm_scenario*  scenario);  /**< Creates new task */
 
 #endif // __GSM_PL_LEVEL__

@@ -11,24 +11,47 @@
 /** \endcond */
 
 #define SCENARIO_MAX_LEN    10  /**< Maximum length of scenario (number of commands) */
+/** \cond HIDDEN_SYMBOLS */
+#ifndef SCENARIO_MAX_LEN
+#error "SCENARIO_MAX_LEN is not defined! Check GSM_AL_LEVEL.h"
+#endif
+/** \endcond */
 
 /** \brief Enumeration of possible actions. Refers to AT commands in HAL */
-typedef enum _GSM_ACTION {
-    CHECK_MODEM,
-    CHECK_BALANCE,
-    SEND_SMS
+typedef enum {
+    AC_PRESENSE,
+    AC_ECHOOFF,
+    AC_ECHOON,
+    AC_GET_VENDOR,
+    AC_GET_MODEL,
+    AC_USSD
+    // TODO more
+} action_body;
+
+/** \brief Action structure. Fully describes one action in scenario */
+typedef struct {
+    enum {
+        TEST_CMD,       /**< Command with "=?"              */
+        READ_CMD,       /**< Command with "?"               */
+        WRITE_CMD,      /**< Command with "=<...>"          */
+        EXEC_CMD        /**< Default command (e.g. "AT\r")  */
+    } action_type;
+
+    action_body cmd;    /**< Action name which refers to real AT command. Contains only body! */
+
+    char* pParams;      /**< If action_type=WRITE_CMD must contain params which goes after "=" */
 } GSM_ACTION;
 
 /** \brief Describes scenario to GSM PL level */
-typedef struct _gsm_scenario {
+typedef struct {
     GSM_ACTION  actions     [SCENARIO_MAX_LEN];              /**< Array with actions (see GSM_ACTION)           */
     uint8_t     ans_retry   [SCENARIO_MAX_LEN];              /**< Array with number of strings in action answer */
 
     /** \brief Receiver AL callback
      * callback() function written by user is used to parse answers
      * \param answer - received string
-     * \param action - which action returned answer
-     * \return 1 if last answer received, else 0
+     * \param action - which action returned the answer
+     * \return 1 if last answer received, else 0. If error - returns 2.
      *
      */
     uint8_t     (*callback)(char* answer, uint8_t action);
