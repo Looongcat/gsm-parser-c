@@ -36,11 +36,16 @@ typedef struct {
   #endif
 } ring_buf;
 
+// ring buffer ops
+#define ring_push(ring, char)    *(ring.base + ring.head++) = char
+
 typedef struct _gsm_modem {
     enum {
         MODEM_CMD_SEND,
-        MODEM_ANS_RECV
-    } state:1;            // if 0 - sending command, else if 1 - receiving answer;
+        MODEM_ANS_WAIT,
+        MODEM_ANS_RECV,
+        MODEM_IDLE          /**< State after scenario execution */
+    } state:2;            // if 0 - sending command, else if 1 - receiving answer;
 
     ring_buf  action_queue;
     ring_buf  answers;
@@ -50,7 +55,8 @@ typedef struct _gsm_modem {
     uint8_t   (*callback)(char* answer, uint8_t action);
 } gsm_modem;
 
-void run_gsm_queue  (gsm_modem*     modem);     /**< Must be execute in main cycle continuously */
-void add_task       (gsm_modem* modem, gsm_scenario*  scenario);  /**< Creates new task */
+void    run_gsm_queue(gsm_modem* modem);                           /**< Must be execute in main cycle continuously */
+void    add_task     (gsm_modem* modem, gsm_scenario*  scenario);  /**< Creates new task */
+void    gsm_queue_halt(gsm_modem* modem);                                          /**< Extremal terminating of scenario */
 
 #endif // __GSM_PL_LEVEL__

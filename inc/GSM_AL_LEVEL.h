@@ -34,7 +34,8 @@ typedef struct {
         TEST_CMD,       /**< Command with "=?"              */
         READ_CMD,       /**< Command with "?"               */
         WRITE_CMD,      /**< Command with "=<...>"          */
-        EXEC_CMD        /**< Default command (e.g. "AT\r")  */
+        EXEC_CMD,       /**< Default command (e.g. "AT\r")  */
+        SCEN_FINISH     /**< Scenario finish                */
     } action_type;
 
     action_body cmd;    /**< Action name which refers to real AT command. Contains only body! */
@@ -45,7 +46,7 @@ typedef struct {
 /** \brief Describes scenario to GSM PL level */
 typedef struct {
     GSM_ACTION  actions     [SCENARIO_MAX_LEN];              /**< Array with actions (see GSM_ACTION)           */
-    uint8_t     ans_retry   [SCENARIO_MAX_LEN];              /**< Array with number of strings in action answer */
+    //uint8_t     ans_retry   [SCENARIO_MAX_LEN];              /**< Array with number of strings in action answer */ // OBSOLETE
 
     /** \brief Receiver AL callback
      * callback() function written by user is used to parse answers
