@@ -4,27 +4,23 @@
 #include <string.h>
 #include <stdio.h>
 
-char buf[256] = "";                                                     // temporary buffer for operations with ring buffers
-
 void run_gsm_queue(gsm_modem* modem) {
+    char buf[256] = "";                                                     // temporary buffer for operations with ring buffers
     uint8_t i = 0;                                                          // cycle variable
 
     switch(modem->state) {                                                  // Modem state cases:
     case MODEM_IDLE:                                                        // scenario is finished, do nothing
         break;
     case MODEM_CMD_SEND:                                                    // need to send command
-            //printf("Command #%d: \r\n",modem->cur_action);                  // DEBUG!
+            printf("Command #%d: \r\n",modem->cur_action);                  // DEBUG!
             // extract command from queue
             if ( modem->action_queue.head != modem->action_queue.tail ) {
-//                for(i = 0;(*(modem->action_queue.base+modem->action_queue.tail) != EOSchar); i++)
-//                    buf[i] = *(modem->action_queue.base+modem->action_queue.tail++);
-                i=0; while (*(modem->action_queue.base+modem->action_queue.tail) != EOSchar)
-                        buf[i++] = *(modem->action_queue.base+modem->action_queue.tail++);
-
+                for(i = 0;(*(modem->action_queue.base+modem->action_queue.tail) != EOSchar); i++)
+                    buf[i] = *(modem->action_queue.base+modem->action_queue.tail++);
                 modem->action_queue.tail++;                                 // to avoid \0 catch
                                                                             // send cmd
                 modem->send_cmd(buf);
-                //printf(">> %s \r\n",buf);                                   // DEBUG
+                printf(">> %s \r\n",buf);                                   // DEBUG
                 modem->state = MODEM_ANS_WAIT;                              // wait for answer
             }
         break;
@@ -35,16 +31,11 @@ void run_gsm_queue(gsm_modem* modem) {
     case MODEM_ANS_RECV:                                                    // parsing answer
         // extract command from queue
         if ( modem->answers.head != modem->answers.tail ) {
-          if (*(modem->answers.base + (modem->answers.head-1)) == '\n') {
-
-//            while (modem->answers.head != modem->answers.tail)
-//                buf[i++] = *(modem->answers.base + modem->answers.tail++);
-//            buf[i++] = EOSchar;
-            i=0;
-            while (*(modem->answers.base + (modem->answers.tail)) != '\n')
-                buf[i++] = *(modem->answers.base + modem->answers.tail++);
-            modem->answers.tail++;buf[i++] = '\n';buf[i++] = EOSchar;
-
+            for(i = 0;( *(modem->answers.base + modem->answers.tail) != '\n' ); i++)
+                buf[i] = *(modem->answers.base + modem->answers.tail++);
+            // dummy \n write to terminate the answer string
+            buf[i] = '\n';buf[i+1]=EOSchar;
+            modem->answers.tail++;
             // callback answer parsing
             switch(modem->callback(buf,modem->cur_action)) {
             case 0:                                                         // still must receive answer
@@ -65,14 +56,13 @@ void run_gsm_queue(gsm_modem* modem) {
                 printf("Default answer handler catch! \r\n");
                 break;
             }   // switch(modem->callback())
-          }   //if (*(modem->answers.base + (modem->answers.head-1)) == '\n')
-        }       // if( modem->answers.head != modem->answers.tail )
+        }       // case MODEM_ANS_RECV
         break;
     }           // switch(modem->state)
     return;
 }
 
-void gsm_add_task(gsm_modem* modem, gsm_scenario* scenario){
+void add_task(gsm_modem* modem, gsm_scenario* scenario){
     #if SCENARIO_MAX_LEN < 255
     uint8_t i = 0;
     #else
@@ -154,3 +144,4 @@ void    gsm_queue_halt(gsm_modem* modem){
 
     return;
 }
+

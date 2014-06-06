@@ -56,7 +56,7 @@ typedef struct _gsm_modem {
 } gsm_modem;
 
 void    run_gsm_queue(gsm_modem* modem);                           /**< Must be execute in main cycle continuously */
-void    add_task     (gsm_modem* modem, gsm_scenario*  scenario);  /**< Creates new task */
+void    gsm_add_task (gsm_modem* modem, gsm_scenario*  scenario);  /**< Creates new task */
 void    gsm_queue_halt(gsm_modem* modem);                                          /**< Extremal terminating of scenario */
 
 #endif // __GSM_PL_LEVEL__

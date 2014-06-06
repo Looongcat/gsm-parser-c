@@ -8,7 +8,9 @@
 #endif
 
 #define AT_PRESENSE            "AT"
+
 #define AT_ECHOOFF             "ATE0"
+
 #define AT_ECHOON              "ATE1"
 
 #define AT_GET_VENDOR          "AT+CGMI"
