@@ -12,6 +12,15 @@ void run_gsm_queue(gsm_modem* modem) {
     switch(modem->state) {                                                  // Modem state cases:
     case MODEM_IDLE:                                                        // scenario is finished, do nothing
         break;
+    case MODEM_SKIP_CMD:
+        #ifdef __DEBUG__
+        printf("\r\nSkipping %d action!\r\n",modem->cur_action);
+        #endif // __DEBUG__
+        while (*(modem->action_queue.base + modem->action_queue.tail++) != EOSchar) ;
+        //modem->action_queue.tail++;
+        modem->cur_action++;
+        modem->state = MODEM_CMD_SEND;
+        break;
     case MODEM_CMD_SEND:                                                    // need to send command
             //printf("Command #%d: \r\n",modem->cur_action);                  // DEBUG!
             // extract command from queue
@@ -21,10 +30,13 @@ void run_gsm_queue(gsm_modem* modem) {
                 i=0; while (*(modem->action_queue.base+modem->action_queue.tail) != EOSchar)
                         buf[i++] = *(modem->action_queue.base+modem->action_queue.tail++);
 
+                buf[i++] = EOSchar;
                 modem->action_queue.tail++;                                 // to avoid \0 catch
                                                                             // send cmd
                 modem->send_cmd(buf);
-                //printf(">> %s \r\n",buf);                                   // DEBUG
+                #ifdef __DEBUG__
+                printf(">> %s \r\n",buf);
+                #endif // __DEBUG__
                 modem->state = MODEM_ANS_WAIT;                              // wait for answer
             }
         break;
@@ -59,10 +71,23 @@ void run_gsm_queue(gsm_modem* modem) {
                     modem->state = MODEM_CMD_SEND;                          // else send next cmd
                 break;
             case 2:
+                #ifdef __DEBUG__
                 printf("Error. Whoopsie! (c) Catbug \r\n");
+                #endif
+                break;
+            case 3: // SKIP COMMAND
+
+                modem->cur_action++;
+                if (modem->action_queue.head == modem->action_queue.tail)   // if commands no more - set modem to idle state
+                    modem->state = MODEM_IDLE;
+                else
+                    modem->state = MODEM_SKIP_CMD;                          // else send next cmd
+
                 break;
             default:
+                #ifdef __DEBUG__
                 printf("Default answer handler catch! \r\n");
+                #endif // __DEBUG__
                 break;
             }   // switch(modem->callback())
           }   //if (*(modem->answers.base + (modem->answers.head-1)) == '\n')
@@ -100,6 +125,12 @@ void gsm_add_task(gsm_modem* modem, gsm_scenario* scenario){
             break;
         case AC_USSD:
             strcpy(_cmd, AT_USSD);
+            break;
+        case AC_PINCODE:
+            strcpy(_cmd, AT_PINCODE);
+            break;
+//        case AC_PUKCODE:
+//            strcpy(_cmd, AT_PUKCODE);
             break;
         }
         /* copying command in buffer */

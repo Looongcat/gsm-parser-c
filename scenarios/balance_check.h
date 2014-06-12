@@ -8,13 +8,21 @@
 #include "..\inc\GSM_PL_LEVEL.h"
 #include "..\inc\ATCOMM_HAL.h"
 
-#define CHECK_BAL_USSD  "1,\"*111#\",15"
+#define __KYIVSTAR_SIM__
 
-// for Kyivstar: +CUSD: 2,Na rahunku: <...> grn
-// for Life:     +CUSD: 2,"Balans 35.28grn, bonus
+#ifdef __LIFE_SIM__
+#define CHECK_BAL_USSD  "1,\"*111#\",15"
 
 #define BAL_START   "Balans "
 #define BAL_END     "grn"
+#endif // __LIFE_SIM__
+
+#ifdef __KYIVSTAR_SIM__
+#define CHECK_BAL_USSD  "1,\"*111#\",15"
+
+#define BAL_START   "rahunku: "
+#define BAL_END     " grn"
+#endif // __KYIVSTAR_SIM__d
 
 extern float current_balance;
 

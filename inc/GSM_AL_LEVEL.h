@@ -24,7 +24,9 @@ typedef enum {
     AC_ECHOON,
     AC_GET_VENDOR,
     AC_GET_MODEL,
-    AC_USSD
+    AC_USSD,
+    AC_PINCODE//,
+//    AC_PUKCODE
     // TODO more
 } action_body;
 

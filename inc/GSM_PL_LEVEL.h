@@ -44,12 +44,14 @@ typedef struct _gsm_modem {
         MODEM_CMD_SEND,
         MODEM_ANS_WAIT,
         MODEM_ANS_RECV,
-        MODEM_IDLE          /**< State after scenario execution */
-    } state:2;            // if 0 - sending command, else if 1 - receiving answer;
+        MODEM_IDLE,          /**< State after scenario execution */
+        MODEM_SKIP_CMD       /**< State for skipping next command in queue */
+    } state:3;            // if 0 - sending command, else if 1 - receiving answer;
 
     ring_buf  action_queue;
     ring_buf  answers;
     uint8_t   cur_action;
+    //uint8_t   skip_cnt;   // new feature
 
     void      (*send_cmd) (char* cmd);                    /**< User defined send function */
     uint8_t   (*callback)(char* answer, uint8_t action);

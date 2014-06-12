@@ -1,4 +1,5 @@
 #include "balance_check.h"
+#include <stdio.h>
 
 float current_balance = 0.0;
 
@@ -13,8 +14,10 @@ uint8_t check_balance_callback(char* answer, uint8_t action) {
             else
             if (strcmp(answer, "OK\r\n") == 0)
                 return 1;   // OK catch, finish the action
-            else
+            else {
+                printf("Failed: %s\r\n",answer);
                 return 2;   // error !
+            }
             break;
 
         case 1: // AT+CUSD?
@@ -27,6 +30,7 @@ uint8_t check_balance_callback(char* answer, uint8_t action) {
             if (strcmp(answer,"OK\r\n")==0) {
                     return 1;
             } else {
+                printf("Failed: %s\r\n",answer);
                 return 2;
             }
             break;
@@ -47,20 +51,31 @@ uint8_t check_balance_callback(char* answer, uint8_t action) {
 
               strncpy(_buf, answer+a_start-1, a_end-a_start);
 
-                //strncpy(_buf, strstr(answer, BAL_START), strstr(answer, BAL_START)-strstr(answer, BAL_END));
+              current_balance = atof(_buf);
 
-                current_balance = atof(_buf);
+              printf("Current balance: %4.2f UAH \r\n", current_balance);
 
-                return 1;
-
-            } else return 2;
-
+              return 1;
+            } else {
+                printf("Failed: %s\r\n",answer);
+                return 2;
+            }
             break;
+        case 3:         // AT+CUSD = 0 \r\n
+            if (strcmp(answer, "\r\n") == 0)
+                return 0;   // echo catch, everything's fine
+            else
+            if (strcmp(answer, "OK\r\n") == 0)
+                return 1;
+            break;
+
           default:
+            printf("Failed: %s\r\n",answer);
             return 2;
             break;
         }
     } else return 0;
+    printf("Failed: %s\r\n",answer);
     return 2;
 }
 
@@ -73,8 +88,9 @@ void check_balance_setup(gsm_modem* modem) {
     scene.actions[0] = (GSM_ACTION) { EXEC_CMD,  AC_ECHOOFF,  ""             };
     scene.actions[1] = (GSM_ACTION) { READ_CMD,  AC_USSD,     ""             };
     scene.actions[2] = (GSM_ACTION) { WRITE_CMD, AC_USSD,     CHECK_BAL_USSD };
+    scene.actions[3] = (GSM_ACTION) { WRITE_CMD, AC_USSD,     "0" };
 
-    scene.actions[3] = (GSM_ACTION) { SCEN_FINISH, 0, "" };
+    scene.actions[4] = (GSM_ACTION) { SCEN_FINISH, 0, "" };
 
     scene.callback   = &check_balance_callback;
     gsm_add_task(modem,&scene);
