@@ -38,6 +38,7 @@ typedef struct {
 
 // ring buffer ops
 #define ring_push(ring, char)    *(ring.base + ring.head++) = char
+#define ring_pop (ring)          *(ring.base + ring.tail++)
 
 typedef struct _gsm_modem {
     enum {
@@ -51,7 +52,15 @@ typedef struct _gsm_modem {
     ring_buf  action_queue;
     ring_buf  answers;
     uint8_t   cur_action;
-    //uint8_t   skip_cnt;   // new feature
+    uint8_t   skip_cnt;   // new feature
+    /*
+        How to use skip_cnt:
+        Callback must return value as:
+        0b 11xx xx11
+        where   11 - skip setting marker
+                xxxx - number of commands to skip
+                11  - must be empty to avoid wrong PL answer parsing
+    */
 
     void      (*send_cmd) (char* cmd);                    /**< User defined send function */
     uint8_t   (*callback)(char* answer, uint8_t action);
@@ -59,6 +68,6 @@ typedef struct _gsm_modem {
 
 void    run_gsm_queue(gsm_modem* modem);                           /**< Must be execute in main cycle continuously */
 void    gsm_add_task (gsm_modem* modem, gsm_scenario*  scenario);  /**< Creates new task */
-void    gsm_queue_halt(gsm_modem* modem);                                          /**< Extremal terminating of scenario */
+void    gsm_queue_halt(gsm_modem* modem);                          /**< Extremal terminating of scenario */
 
 #endif // __GSM_PL_LEVEL__

@@ -8,6 +8,7 @@ char buf[256] = "";                                                     // tempo
 
 void run_gsm_queue(gsm_modem* modem) {
     uint8_t i = 0;                                                          // cycle variable
+    uint8_t cb_ans = 0;
 
     switch(modem->state) {                                                  // Modem state cases:
     case MODEM_IDLE:                                                        // scenario is finished, do nothing
@@ -16,10 +17,16 @@ void run_gsm_queue(gsm_modem* modem) {
         #ifdef __DEBUG__
         printf("\r\nSkipping %d action!\r\n",modem->cur_action);
         #endif // __DEBUG__
-        while (*(modem->action_queue.base + modem->action_queue.tail++) != EOSchar) ;
+
+        while ( *(modem->action_queue.base+modem->action_queue.tail++) != EOSchar ) ;
         //modem->action_queue.tail++;
         modem->cur_action++;
-        modem->state = MODEM_CMD_SEND;
+        modem->skip_cnt--;
+
+        if (modem->skip_cnt == 0)
+            modem->state = MODEM_CMD_SEND;
+        else
+            modem->state = MODEM_SKIP_CMD;
         break;
     case MODEM_CMD_SEND:                                                    // need to send command
             //printf("Command #%d: \r\n",modem->cur_action);                  // DEBUG!
@@ -38,7 +45,7 @@ void run_gsm_queue(gsm_modem* modem) {
                 printf(">> %s \r\n",buf);
                 #endif // __DEBUG__
                 modem->state = MODEM_ANS_WAIT;                              // wait for answer
-            }
+            } else modem->state = MODEM_IDLE;
         break;
 
     case MODEM_ANS_WAIT:                                                    // waiting for answer, clears by uart interrupt
@@ -58,7 +65,8 @@ void run_gsm_queue(gsm_modem* modem) {
             modem->answers.tail++;buf[i++] = '\n';buf[i++] = EOSchar;
 
             // callback answer parsing
-            switch(modem->callback(buf,modem->cur_action)) {
+            cb_ans = modem->callback(buf,modem->cur_action);
+            switch(cb_ans) {
             case 0:                                                         // still must receive answer
                 // take a rest, bro
                 //for(i = 0; i < 255; i++) buf[i] = 0x00;// dummy erasing for possible answer echoing
@@ -75,19 +83,15 @@ void run_gsm_queue(gsm_modem* modem) {
                 printf("Error. Whoopsie! (c) Catbug \r\n");
                 #endif
                 break;
-            case 3: // SKIP COMMAND
-
-                modem->cur_action++;
-                if (modem->action_queue.head == modem->action_queue.tail)   // if commands no more - set modem to idle state
-                    modem->state = MODEM_IDLE;
-                else
-                    modem->state = MODEM_SKIP_CMD;                          // else send next cmd
-
-                break;
             default:
-                #ifdef __DEBUG__
-                printf("Default answer handler catch! \r\n");
-                #endif // __DEBUG__
+                if ((cb_ans & 0xC3) == 0xC3){    // catched skip marker
+                    modem->skip_cnt = (cb_ans & ~0xC3) >> 2;
+                    modem->cur_action++;
+                    if (modem->action_queue.head == modem->action_queue.tail)   // if commands no more - set modem to idle state
+                        modem->state = MODEM_IDLE;
+                    else
+                        modem->state = MODEM_SKIP_CMD;                          // else send next cmd
+                } else ;
                 break;
             }   // switch(modem->callback())
           }   //if (*(modem->answers.base + (modem->answers.head-1)) == '\n')
@@ -129,8 +133,8 @@ void gsm_add_task(gsm_modem* modem, gsm_scenario* scenario){
         case AC_PINCODE:
             strcpy(_cmd, AT_PINCODE);
             break;
-//        case AC_PUKCODE:
-//            strcpy(_cmd, AT_PUKCODE);
+        case AC_PIN2CODE:
+            strcpy(_cmd, AT_PIN2CODE);
             break;
         }
         /* copying command in buffer */
@@ -167,8 +171,8 @@ void gsm_add_task(gsm_modem* modem, gsm_scenario* scenario){
         ring_push(modem->action_queue,EOSchar);
         i++;
     }
-    modem->callback = scenario->callback;
-    modem->cur_action = MODEM_CMD_SEND;
+    modem->callback     = scenario->callback;
+    modem->cur_action   = MODEM_CMD_SEND;
     return;
 }
 

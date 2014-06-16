@@ -10,7 +10,7 @@
 #include <stdint.h>
 /** \endcond */
 
-#define SCENARIO_MAX_LEN    10  /**< Maximum length of scenario (number of commands) */
+#define SCENARIO_MAX_LEN    20  /**< Maximum length of scenario (number of commands) */
 /** \cond HIDDEN_SYMBOLS */
 #ifndef SCENARIO_MAX_LEN
 #error "SCENARIO_MAX_LEN is not defined! Check GSM_AL_LEVEL.h"
@@ -25,8 +25,8 @@ typedef enum {
     AC_GET_VENDOR,
     AC_GET_MODEL,
     AC_USSD,
-    AC_PINCODE//,
-//    AC_PUKCODE
+    AC_PINCODE,
+    AC_PIN2CODE
     // TODO more
 } action_body;
 

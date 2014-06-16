@@ -19,6 +19,7 @@
 #define AT_USSD                "AT+CUSD" // ?, =?, \r, =<int>,<char>,<int>
 
 #define AT_PINCODE             "AT+CPIN"
+#define AT_PIN2CODE            "AT+CPIN2"
 
 #define AT_CONN_STATUS         "AT+CGDCONT"
 
