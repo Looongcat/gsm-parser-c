@@ -95,7 +95,18 @@ uint8_t gsm_init_callback(char* answer, uint8_t action){
             return 2;
         break;
     case 5:     // NEW PIN CODE WAS INPUTED WITH PUK
-
+        // MUST BE CHECKED ON SIM CARD!
+//        if (strcmp(answer, "\r\n")==0)
+//            return 0;
+//        else
+//        if (strcmp(answer, "OK\r\n")==0)
+//            return 1;
+//        else
+//        if (strcmp(answer, "ERROR\r\n")==0) // WRONG PIN!!!
+//            // here must be routine to manage wrong pin
+//            return 2;
+//        else
+//            return 2;
         break;
     case 6:     // CHECK NEW PIN ANSWER
 
@@ -125,25 +136,11 @@ uint8_t gsm_init_callback(char* answer, uint8_t action){
     return 2;
 }
 void gsm_init_setup(gsm_modem* modem, char pin[2][8], char puk[2][8]){
-    // TODO
     char str[20];
     gsm_scenario scene;
 
     modem->action_queue.head  = 0;
     modem->action_queue.tail  = 0;
-    /*
-    scene.actions[0] = (GSM_ACTION) { EXEC_CMD,  AC_PRESENSE, ""             };
-    scene.actions[1] = (GSM_ACTION) { EXEC_CMD,  AC_ECHOOFF,  ""             };
-    scene.actions[2] = (GSM_ACTION) { READ_CMD,  AC_PINCODE,  ""             };
-
-    scene.actions[3] = (GSM_ACTION) { WRITE_CMD, AC_PINCODE,  (pin == NULL)? "0000": pin[0] };
-    scene.actions[4] = (GSM_ACTION) { READ_CMD,  AC_PINCODE,  ""             };
-
-    scene.actions[5] = (GSM_ACTION) { SCEN_FINISH, 0, "" };
-    */
-    /*
-        Need to add multiple skip option in modem descriptor!
-    */
 
     // MUST HAVE part
     scene.actions[0] = (GSM_ACTION) { EXEC_CMD,  AC_PRESENSE, ""             };
@@ -156,6 +153,7 @@ void gsm_init_setup(gsm_modem* modem, char pin[2][8], char puk[2][8]){
     scene.actions[4] = (GSM_ACTION) { READ_CMD,  AC_PINCODE,  ""             };
     scene.actions[5] = (GSM_ACTION) { WRITE_CMD, AC_PINCODE,  (puk == NULL)? "0000": str };  // must be through strcat
     scene.actions[6] = (GSM_ACTION) { READ_CMD,  AC_PINCODE,  ""             };
+    // here enter pin AGAIN!
 
     if (puk[0] != NULL)
         strcpy(str,puk[1]); strcat(str,","); strcat(str,pin[1]);
@@ -163,8 +161,9 @@ void gsm_init_setup(gsm_modem* modem, char pin[2][8], char puk[2][8]){
     scene.actions[8] = (GSM_ACTION) { READ_CMD,  AC_PINCODE,  ""             };
     scene.actions[9] = (GSM_ACTION) { WRITE_CMD, AC_PIN2CODE,  (puk == NULL)? "0000": str };  // must be through strcat
     scene.actions[10]= (GSM_ACTION) { READ_CMD,  AC_PINCODE,  ""             };
+    // enter pin2 AGAIN!
 
-    // again MUST HAVE part
+    // MUST HAVE part
     scene.actions[11] = (GSM_ACTION) { SCEN_FINISH, 0, "" };
 
     scene.callback   = &gsm_init_callback;

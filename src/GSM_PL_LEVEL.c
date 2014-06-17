@@ -172,7 +172,8 @@ void gsm_add_task(gsm_modem* modem, gsm_scenario* scenario){
         i++;
     }
     modem->callback     = scenario->callback;
-    modem->cur_action   = MODEM_CMD_SEND;
+    modem->state        = MODEM_CMD_SEND;
+    modem->cur_action   = 0;
     return;
 }
 
