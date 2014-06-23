@@ -96,20 +96,21 @@ uint8_t gsm_init_callback(char* answer, uint8_t action){
         break;
     case 5:     // NEW PIN CODE WAS INPUTED WITH PUK
         // MUST BE CHECKED ON SIM CARD!
+        // SIM answer: \r\nOK\r\n
 //        if (strcmp(answer, "\r\n")==0)
 //            return 0;
 //        else
 //        if (strcmp(answer, "OK\r\n")==0)
 //            return 1;
 //        else
-//        if (strcmp(answer, "ERROR\r\n")==0) // WRONG PIN!!!
+//        if (strcmp(answer, "ERROR\r\n")==0) // WRONG PUK!!!
 //            // here must be routine to manage wrong pin
 //            return 2;
 //        else
 //            return 2;
         break;
     case 6:     // CHECK NEW PIN ANSWER
-
+        // must be +CPIN: READY
         break;
     case 7:     // PIN2 CODE WAS INPUT
         if ( (strcmp(answer, "\r\n")==0) || ( strcmp(answer, "+CPIN: READY\r\n") == 0 ) )
