@@ -26,7 +26,10 @@ typedef enum {
     AC_GET_MODEL,
     AC_USSD,
     AC_PINCODE,
-    AC_PIN2CODE
+    AC_PIN2CODE,
+    AC_SET_PDUMODE,
+    AC_SEND_PDUSMS,
+    AC_RAW_DATA
     // TODO more
 } action_body;
 
@@ -42,7 +45,7 @@ typedef struct {
 
     action_body cmd;    /**< Action name which refers to real AT command. Contains only body! */
 
-    char* pParams;      /**< If action_type=WRITE_CMD must contain params which goes after "=" */
+    char pParams[200];      /**< If action_type=WRITE_CMD must contain params which goes after "=" */
 } GSM_ACTION;
 
 /** \brief Describes scenario to GSM PL level */

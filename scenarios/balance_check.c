@@ -106,8 +106,7 @@ void check_balance_setup(gsm_modem* modem, char* ussd, char* start_marker, char*
 
     strcpy(BAL_START,start_marker);
     strcpy(BAL_END,end_marker);
-    //strcat(str,"1,\"");    strcat(str,ussd);    strcat(str,"\",15");
-    sprintf(str,"1,\"%s\",15",ussd);
+    sprintf(str,"1,\"%s\",15",ussd); // format: <n>,<str>,<dcs>
 
     scene.actions[0] = (GSM_ACTION) { EXEC_CMD,  AC_ECHOOFF,  ""             };
     scene.actions[1] = (GSM_ACTION) { READ_CMD,  AC_USSD,     ""             };

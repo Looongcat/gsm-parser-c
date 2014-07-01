@@ -1,7 +1,8 @@
 #ifndef __SMS_ROUTINES__
 #define __SMS_ROUTINES__
 
-#include "ucs2_table.h"
+#include <string.h>
+#include <stdint.h>
 
 #define METHOD_TABLE    1   // table method for ucs2 converting
 

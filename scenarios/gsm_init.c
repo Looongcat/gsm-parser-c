@@ -164,6 +164,8 @@ void gsm_init_setup(gsm_modem* modem, char pin[2][8], char puk[2][8]){
     scene.actions[10]= (GSM_ACTION) { READ_CMD,  AC_PINCODE,  ""             };
     // enter pin2 AGAIN!
 
+    // SIM900 after \r\nOK\r\n transmits "Call Ready\r\n"
+
     // MUST HAVE part
     scene.actions[11] = (GSM_ACTION) { SCEN_FINISH, 0, "" };
 

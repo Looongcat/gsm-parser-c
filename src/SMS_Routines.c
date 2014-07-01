@@ -1,7 +1,5 @@
-#include <string.h>
-#include <stdint.h>
-
 #include "../inc/SMS_Routines.h"
+#include "../inc/ucs2_table.h"
 
 void gsm_7bit_enc(char msg[], char out_buf[]) {
     char* tempPtr   = msg;
