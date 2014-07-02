@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #define METHOD_TABLE    1   // table method for ucs2 converting
+#define METHOD_NONTABLE 0
 
 void gsm_7bit_enc(char msg[], char out_buf[]);
 wchar_t char2ucs2(char a);

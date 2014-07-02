@@ -62,7 +62,8 @@ typedef struct _gsm_modem {
                 11  - must be empty to avoid wrong PL answer parsing
     */
 
-    void      (*send_cmd) (char* cmd);                    /**< User defined send function */
+    //void      (*send_cmd) (char* cmd);                    /**< User defined send function */
+    void      (*send_cmd) (char* cmd, uint8_t len);                    /**< User defined send function */
     uint8_t   (*callback)(char* answer, uint8_t action);
 } gsm_modem;
 

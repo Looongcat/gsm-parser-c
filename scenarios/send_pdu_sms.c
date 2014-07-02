@@ -27,7 +27,16 @@ uint8_t send_pdu_sms_callback(char* answer, uint8_t action) {
         break;
 
     case 2:
-        // TODO
+        /*
+        \r\n+CMGS: 24\r\nOK\r\n
+        */
+        if ((strncmp(answer,"+CMGS:",6)==0) || (strcmp(answer,"\r\n")==0)) {
+            return 0;
+        } else
+        if (strcmp(answer,"OK\r\n")==0)
+            return 1;
+        else
+            return 2;
         break;
 
     default:
@@ -39,7 +48,7 @@ uint8_t send_pdu_sms_callback(char* answer, uint8_t action) {
 void send_pdu_sms_setup(gsm_modem* modem, sms_descriptor* sms) {
     // TODO
     gsm_scenario scene;
-    char str[200]    = "";
+    char str[256]    = "";
     char tpdu_len[3] = "";
     uint8_t i = 0;
     char *ptr1, *ptr2;
@@ -49,8 +58,7 @@ void send_pdu_sms_setup(gsm_modem* modem, sms_descriptor* sms) {
 
     get_pdu_string(sms, str);
     while(str[i++]!=0x1A);
-    //sprintf(tpdu_len,"%0X",i-1);
-    sprintf(tpdu_len,"%d",i-1);
+    sprintf(tpdu_len,"%d",((i-1)>>1)-1); // -1 for excluding 0x1A and second "-1" for excluding SMSC
 
     // HERE is scenario
     scene.actions[0] = (GSM_ACTION) { WRITE_CMD,  AC_SET_PDUMODE, "0"             };    // set up PDU mode
@@ -86,22 +94,22 @@ void gsm_number_swap(char* number, char dst[]) {
             *pStr++ = ((*(pNumber+1)-'0') << 4) | (*(pNumber)-'0');
 
         pNumber+=2;
-
     }
-    strncat(str,"\0",1);
     strcpy(dst, str);
     return;
 }
 
 void get_pdu_string(sms_descriptor* sms, char dst[]) {
     char    tempnum[8]  = "";
-    char*   pTemp       = dst;
+    char    temp[256]   = "";
+    char*   pTemp       = temp;
+    char*   pDst        = dst;
     uint8_t i           = 0;
 
     // SMSC
     *pTemp++ = 0x00;
     // PDU-Type
-    *pTemp++ = (0<<TP_MTIH) | (1<<TP_MTIL) | (1<<TP_VPFH) | (0<<TP_VPFL);       // MTI = 01 - outbox sms, VPF = 0b10, relative format
+    *pTemp++ = (0<<TP_MTIH) | (1<<TP_MTIL);// | (1<<TP_VPFH) | (0<<TP_VPFL);       // MTI = 01 - outbox sms, VPF = 0b10, relative format
     // TP-MR
     *pTemp++ = 0x00;                                                            // unnecessary
     // TP-DA
@@ -126,7 +134,7 @@ void get_pdu_string(sms_descriptor* sms, char dst[]) {
     if (sms->flash == 1)
         *(pTemp-1) |= 0x10;
     // TP-VP
-    *pTemp++ = 170; // 1 day + 4 hour?
+    //*pTemp++ = 167; // 1 day
     // TP-UDL
     switch(sms->encoding) {
         case SMS_7BIT_ENC:
@@ -156,11 +164,14 @@ void get_pdu_string(sms_descriptor* sms, char dst[]) {
             }
         } break;
     }
-    *(pTemp-1) = 0x1A;
+    *(pTemp) = 0x1A;
 
-//    printf("DEBUG\r\n\r\n PDU String:\r\n");
-//    pTemp = dst;
-//    while(*pTemp != 0x1A)
-//        printf("0x%02X ", *pTemp++);
+    pTemp = temp;
+    while(*pTemp != 0x1A) {
+        sprintf(pDst,"%02X",(uint8_t)*pTemp++);
+        pDst+=2;
+    }
+    *pDst++ = 0x1A;
+    //*pDst   = 0x00;
     return;
 }

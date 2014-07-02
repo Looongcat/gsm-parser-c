@@ -47,8 +47,8 @@ void run_gsm_queue(gsm_modem* modem) {
                 buf[i++] = EOSchar;
             }
                 modem->action_queue.tail++;                                 // to avoid \0 catch
-                                                                                // send cmd
-                modem->send_cmd(buf);   // NEED TO FIX with width specification
+                                                                            // send cmd
+                modem->send_cmd(buf,i);
                 #ifdef __DEBUG__
                 printf(">> %s \r\n",buf);
                 #endif // __DEBUG__
