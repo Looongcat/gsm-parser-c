@@ -31,21 +31,21 @@ void run_gsm_queue(gsm_modem* modem) {
         // extract command from queue
         // raw data begins with "RAW" word
         if ( modem->action_queue.head != modem->action_queue.tail ) {
-            if (strncmp((char*)(modem->action_queue.base + modem->action_queue.tail),"RAW",3) == 0) {
-                // TODO RAW PARSE
-                modem->action_queue.tail+=3; // skip "RAW"
-                i=0;
-                while (*(modem->action_queue.base+modem->action_queue.tail) != 0x1A)
-                        buf[i++] = *(modem->action_queue.base+modem->action_queue.tail++);
-                buf[i] = 0x1A;
-                modem->action_queue.tail++;
-            } else {
+//            if (strncmp((char*)(modem->action_queue.base + modem->action_queue.tail),"RAW",3) == 0) {
+//                // TODO RAW PARSE
+//                modem->action_queue.tail+=3; // skip "RAW"
+//                i=0;
+//                while (*(modem->action_queue.base+modem->action_queue.tail) != 0x1A)
+//                        buf[i++] = *(modem->action_queue.base+modem->action_queue.tail++);
+//                buf[i] = 0x1A;
+//                modem->action_queue.tail++;
+//            } else {
                 i=0;
                 while (*(modem->action_queue.base+modem->action_queue.tail) != EOSchar)
                     buf[i++] = *(modem->action_queue.base+modem->action_queue.tail++);
 
                 buf[i++] = EOSchar;
-            }
+//            }
                 modem->action_queue.tail++;                                 // to avoid \0 catch
                                                                             // send cmd
                 modem->send_cmd(buf,i);
@@ -158,14 +158,15 @@ void gsm_add_task(gsm_modem* modem, gsm_scenario* scenario){
         case AC_RAW_DATA:{                                       // exception case
             char* ptr1 = (char*)&(scenario->actions[i].pParams);
 
-            ring_push(modem->action_queue,'R');
-            ring_push(modem->action_queue,'A');
-            ring_push(modem->action_queue,'W');
+//            ring_push(modem->action_queue,'R');
+//            ring_push(modem->action_queue,'A');
+//            ring_push(modem->action_queue,'W');
 
             while(*ptr1 != 0x1A)
                 ring_push(modem->action_queue, *ptr1++);
 
             ring_push(modem->action_queue, *ptr1);
+            ring_push(modem->action_queue, '\0');
             }break;
         default:
             break;

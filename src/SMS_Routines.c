@@ -11,8 +11,12 @@ void gsm_7bit_enc(char msg[], char out_buf[]) {
     while(*tempPtr != 0) {
         mask = 0;
         for(i = 0; i < 7; i++) {
-            if (*msg == 0)
+            if (*tempPtr == 0)
                 break;
+            if (*(tempPtr+1) == 0) {
+                *outPtr++ = *tempPtr;
+                break;
+            }
 
             mask |= 1<<i;           // update mask
             *outPtr++ = (*tempPtr >> i) | ( (*(tempPtr+1) & mask) << (7-i) );
@@ -20,6 +24,7 @@ void gsm_7bit_enc(char msg[], char out_buf[]) {
         }
         tempPtr++;  // skip 8th symbol
     }
+    *outPtr = '\0';
     return;
 }
 

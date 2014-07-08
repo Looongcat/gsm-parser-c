@@ -28,8 +28,9 @@ uint8_t send_pdu_sms_callback(char* answer, uint8_t action) {
 
     case 2:
         /*
-        \r\n+CMGS: 24\r\nOK\r\n
+        \r\n+CMGS: 24\r\n\r\nOK\r\n
         */
+        printf("DEBUG: %s\r\n", answer);
         if ((strncmp(answer,"+CMGS:",6)==0) || (strcmp(answer,"\r\n")==0)) {
             return 0;
         } else
@@ -46,19 +47,18 @@ uint8_t send_pdu_sms_callback(char* answer, uint8_t action) {
 }
 
 void send_pdu_sms_setup(gsm_modem* modem, sms_descriptor* sms) {
-    // TODO
-    gsm_scenario scene;
-    char str[256]    = "";
-    char tpdu_len[3] = "";
-    uint8_t i = 0;
-    char *ptr1, *ptr2;
+    gsm_scenario    scene;
+    char            str[256]    = "";
+    char            tpdu_len[3] = "";
+    uint8_t         i           = 0;
+    char            *ptr1       = str;
 
     modem->action_queue.head  = 0;
     modem->action_queue.tail  = 0;
 
     get_pdu_string(sms, str);
-    while(str[i++]!=0x1A);
-    sprintf(tpdu_len,"%d",((i-1)>>1)-1); // -1 for excluding 0x1A and second "-1" for excluding SMSC
+    while(*ptr1++ != 0x1A) i++;
+    sprintf(tpdu_len,"%d",(i>>1)-1); // "-1" for excluding SMSC
 
     // HERE is scenario
     scene.actions[0] = (GSM_ACTION) { WRITE_CMD,  AC_SET_PDUMODE, "0"             };    // set up PDU mode
@@ -67,11 +67,8 @@ void send_pdu_sms_setup(gsm_modem* modem, sms_descriptor* sms) {
     strcpy(scene.actions[1].pParams, tpdu_len);
 
     scene.actions[2] = (GSM_ACTION) { WRITE_CMD,  AC_RAW_DATA,    ""              };
-    ptr1 = (char*)&str;
-    ptr2 = (char*)&(scene.actions[2].pParams);
-    while(*ptr1 != 0x1A)
-        *ptr2++ = *ptr1++;
-    *ptr2 = *ptr1;
+
+    memcpy(scene.actions[2].pParams, str, i+1);
 
     scene.actions[3] = (GSM_ACTION) { SCEN_FINISH, 0, "" };
 
@@ -164,14 +161,14 @@ void get_pdu_string(sms_descriptor* sms, char dst[]) {
             }
         } break;
     }
-    *(pTemp) = 0x1A;
+    *(pTemp++) = 0x1A;
+    *(pTemp++) = 'E';*(pTemp++) = 'N';*(pTemp) = 'D';
 
     pTemp = temp;
-    while(*pTemp != 0x1A) {
+    while(strncmp(pTemp,"\032END",3)!=0) {
         sprintf(pDst,"%02X",(uint8_t)*pTemp++);
         pDst+=2;
     }
     *pDst++ = 0x1A;
-    //*pDst   = 0x00;
     return;
 }
