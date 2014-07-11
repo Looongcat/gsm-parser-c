@@ -99,19 +99,20 @@ uint8_t check_balance_callback(char* answer, uint8_t action) {
 
 void check_balance_setup(gsm_modem* modem, char* ussd, char* start_marker, char* end_marker) {
     gsm_scenario scene;
-    char str[20]="";
 
     modem->action_queue.head  = 0;
     modem->action_queue.tail  = 0;
 
     strcpy(BAL_START,start_marker);
     strcpy(BAL_END,end_marker);
-    sprintf(str,"1,\"%s\",15",ussd); // format: <n>,<str>,<dcs>
 
     scene.actions[0] = (GSM_ACTION) { EXEC_CMD,  AC_ECHOOFF,  ""             };
     scene.actions[1] = (GSM_ACTION) { READ_CMD,  AC_USSD,     ""             };
     scene.actions[2] = (GSM_ACTION) { WRITE_CMD, AC_USSD,     "0"            };
-    scene.actions[3] = (GSM_ACTION) { WRITE_CMD, AC_USSD,     str            };
+    scene.actions[3] = (GSM_ACTION) { WRITE_CMD, AC_USSD,     ""            };
+
+    sprintf(scene.actions[3].pParams,"1,\"%s\",15",ussd); // format: <n>,<str>,<dcs>
+
     scene.actions[4] = (GSM_ACTION) { WRITE_CMD, AC_USSD,     "0"            };
 
     scene.actions[5] = (GSM_ACTION) { SCEN_FINISH, 0, "" };
