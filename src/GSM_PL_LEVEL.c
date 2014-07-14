@@ -145,6 +145,27 @@ void gsm_add_task(gsm_modem* modem, gsm_scenario* scenario){
         case AC_SET_PDUMODE:
             strcpy(_cmd, AT_SET_PDUMODE);
             break;
+        case AC_CGATT:
+            strcpy(_cmd, AT_CGATT);
+            break;
+        case AC_CONN_SETTINGS:
+            strcpy(_cmd, AT_CONN_SETTINGS);
+            break;
+        case AC_APN_SETTINGS:
+            strcpy(_cmd, AT_APN_SETTINGS);
+            break;
+        case AC_GPRS_START:
+            strcpy(_cmd, AT_GPRS_START);
+            break;
+        case AC_GPRS_GETIP:
+            strcpy(_cmd, AT_GPRS_GETIP);
+            break;
+        case AC_GPRS_STATUS:
+            strcpy(_cmd, AT_GPRS_STATUS);
+            break;
+        case AC_GPRS_RESET:
+            strcpy(_cmd, AT_GPRS_RESET);
+            break;
         case AC_RAW_DATA:{                                       // exception case
             char* ptr1 = (char*)&(scenario->actions[i].pParams);
 

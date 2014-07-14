@@ -29,6 +29,13 @@ typedef enum {
     AC_PIN2CODE,
     AC_SET_PDUMODE,
     AC_SEND_PDUSMS,
+    AC_CGATT,
+    AC_CONN_SETTINGS,
+    AC_APN_SETTINGS,
+    AC_GPRS_START,
+    AC_GPRS_GETIP,
+    AC_GPRS_STATUS,
+    AC_GPRS_RESET,
     AC_RAW_DATA
     // TODO more
 } action_body;

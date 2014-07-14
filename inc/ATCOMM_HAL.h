@@ -24,8 +24,12 @@
 #define AT_SET_PDUMODE         "AT+CMGF"
 #define AT_SEND_PDUSMS         "AT+CMGS"
 
-#define AT_CONN_STATUS         "AT+CGDCONT"
-
-
+#define AT_GPRS_RESET          "AT+CIPSHUT"
+#define AT_CGATT               "AT+CGATT"
+#define AT_CONN_SETTINGS       "AT+CGDCONT"
+#define AT_APN_SETTINGS        "AT+CSTT"
+#define AT_GPRS_START          "AT+CIICR"
+#define AT_GPRS_GETIP          "AT+CIFSR"
+#define AT_GPRS_STATUS         "AT+CIPSTATUS"
 
 #endif // __AT_COMM__
